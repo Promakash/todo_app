@@ -1,0 +1,10 @@
+grpc:
+  port: 5050
+
+postgres:                  # Конфиг PostgreSQL:
+  host: storage            # Хост бд
+  port: 5432               # Порт бд
+  user: postgres           # Имя пользователя
+  password: password       # Пароль пользователя
+  db_name: postgres        # Имя бд
+

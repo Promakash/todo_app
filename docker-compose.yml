@@ -1,0 +1,25 @@
+services:
+  db-service:
+    build:
+      dockerfile: ./db-service/Dockerfile
+      context: ./
+    depends_on:
+      storage:
+        condition: service_healthy
+    ports:
+      - "5050:5050"
+    environment:
+      - DB_SERVICE_CONFIG=config/docker.yml
+  storage:
+    healthcheck:
+      test: pg_isready -U postgres -d postgres
+    image: postgres:15.4
+    container_name: storage
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - 5432:5432
