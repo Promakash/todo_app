@@ -8,3 +8,8 @@ postgres:                  # Конфиг PostgreSQL:
   password: password       # Пароль пользователя
   db_name: postgres        # Имя бд
 
+redis:
+  host: cache
+  port: 6379
+  password: redis
+  TTL: 120

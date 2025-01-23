@@ -6,6 +6,8 @@ services:
     depends_on:
       storage:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     ports:
       - "5050:5050"
     environment:
@@ -13,7 +15,7 @@ services:
   storage:
     healthcheck:
       test: pg_isready -U postgres -d postgres
-    image: postgres:15.4
+    image: postgres:15.4-alpine
     container_name: storage
     environment:
       POSTGRES_DB: postgres
@@ -22,4 +24,13 @@ services:
     volumes:
       - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - 5432:5432
+      - "5432:5432"
+  cache:
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+    image: redis:latest
+    container_name: cache
+    environment:
+      REDIS_PASSWORD: redis
+    ports:
+      - "6379:6379"

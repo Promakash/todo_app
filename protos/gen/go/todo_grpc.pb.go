@@ -19,20 +19,22 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Todo_Create_FullMethodName = "/todo.Todo/Create"
-	Todo_List_FullMethodName   = "/todo.Todo/List"
-	Todo_Delete_FullMethodName = "/todo.Todo/Delete"
-	Todo_Done_FullMethodName   = "/todo.Todo/Done"
+	Todo_CreateTask_FullMethodName     = "/todo.Todo/CreateTask"
+	Todo_ListTasks_FullMethodName      = "/todo.Todo/ListTasks"
+	Todo_DeleteTaskByID_FullMethodName = "/todo.Todo/DeleteTaskByID"
+	Todo_DoneTaskByID_FullMethodName   = "/todo.Todo/DoneTaskByID"
+	Todo_GetByID_FullMethodName        = "/todo.Todo/GetByID"
 )
 
 // TodoClient is the client API for Todo service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TodoClient interface {
-	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
-	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
-	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
-	Done(ctx context.Context, in *DoneRequest, opts ...grpc.CallOption) (*DoneResponse, error)
+	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*CreateTaskResponse, error)
+	ListTasks(ctx context.Context, in *ListTasksRequest, opts ...grpc.CallOption) (*ListTasksResponse, error)
+	DeleteTaskByID(ctx context.Context, in *DeleteTaskByIDRequest, opts ...grpc.CallOption) (*DeleteTaskByIDResponse, error)
+	DoneTaskByID(ctx context.Context, in *DoneTaskByIDRequest, opts ...grpc.CallOption) (*DoneTaskByIDResponse, error)
+	GetByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetByIDResponse, error)
 }
 
 type todoClient struct {
@@ -43,40 +45,50 @@ func NewTodoClient(cc grpc.ClientConnInterface) TodoClient {
 	return &todoClient{cc}
 }
 
-func (c *todoClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
+func (c *todoClient) CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*CreateTaskResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateResponse)
-	err := c.cc.Invoke(ctx, Todo_Create_FullMethodName, in, out, cOpts...)
+	out := new(CreateTaskResponse)
+	err := c.cc.Invoke(ctx, Todo_CreateTask_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *todoClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
+func (c *todoClient) ListTasks(ctx context.Context, in *ListTasksRequest, opts ...grpc.CallOption) (*ListTasksResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListResponse)
-	err := c.cc.Invoke(ctx, Todo_List_FullMethodName, in, out, cOpts...)
+	out := new(ListTasksResponse)
+	err := c.cc.Invoke(ctx, Todo_ListTasks_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *todoClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+func (c *todoClient) DeleteTaskByID(ctx context.Context, in *DeleteTaskByIDRequest, opts ...grpc.CallOption) (*DeleteTaskByIDResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, Todo_Delete_FullMethodName, in, out, cOpts...)
+	out := new(DeleteTaskByIDResponse)
+	err := c.cc.Invoke(ctx, Todo_DeleteTaskByID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *todoClient) Done(ctx context.Context, in *DoneRequest, opts ...grpc.CallOption) (*DoneResponse, error) {
+func (c *todoClient) DoneTaskByID(ctx context.Context, in *DoneTaskByIDRequest, opts ...grpc.CallOption) (*DoneTaskByIDResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DoneResponse)
-	err := c.cc.Invoke(ctx, Todo_Done_FullMethodName, in, out, cOpts...)
+	out := new(DoneTaskByIDResponse)
+	err := c.cc.Invoke(ctx, Todo_DoneTaskByID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *todoClient) GetByID(ctx context.Context, in *GetByIDRequest, opts ...grpc.CallOption) (*GetByIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetByIDResponse)
+	err := c.cc.Invoke(ctx, Todo_GetByID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,10 +99,11 @@ func (c *todoClient) Done(ctx context.Context, in *DoneRequest, opts ...grpc.Cal
 // All implementations must embed UnimplementedTodoServer
 // for forward compatibility.
 type TodoServer interface {
-	Create(context.Context, *CreateRequest) (*CreateResponse, error)
-	List(context.Context, *ListRequest) (*ListResponse, error)
-	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
-	Done(context.Context, *DoneRequest) (*DoneResponse, error)
+	CreateTask(context.Context, *CreateTaskRequest) (*CreateTaskResponse, error)
+	ListTasks(context.Context, *ListTasksRequest) (*ListTasksResponse, error)
+	DeleteTaskByID(context.Context, *DeleteTaskByIDRequest) (*DeleteTaskByIDResponse, error)
+	DoneTaskByID(context.Context, *DoneTaskByIDRequest) (*DoneTaskByIDResponse, error)
+	GetByID(context.Context, *GetByIDRequest) (*GetByIDResponse, error)
 	mustEmbedUnimplementedTodoServer()
 }
 
@@ -101,17 +114,20 @@ type TodoServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTodoServer struct{}
 
-func (UnimplementedTodoServer) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+func (UnimplementedTodoServer) CreateTask(context.Context, *CreateTaskRequest) (*CreateTaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTask not implemented")
 }
-func (UnimplementedTodoServer) List(context.Context, *ListRequest) (*ListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+func (UnimplementedTodoServer) ListTasks(context.Context, *ListTasksRequest) (*ListTasksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTasks not implemented")
 }
-func (UnimplementedTodoServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+func (UnimplementedTodoServer) DeleteTaskByID(context.Context, *DeleteTaskByIDRequest) (*DeleteTaskByIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTaskByID not implemented")
 }
-func (UnimplementedTodoServer) Done(context.Context, *DoneRequest) (*DoneResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Done not implemented")
+func (UnimplementedTodoServer) DoneTaskByID(context.Context, *DoneTaskByIDRequest) (*DoneTaskByIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DoneTaskByID not implemented")
+}
+func (UnimplementedTodoServer) GetByID(context.Context, *GetByIDRequest) (*GetByIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByID not implemented")
 }
 func (UnimplementedTodoServer) mustEmbedUnimplementedTodoServer() {}
 func (UnimplementedTodoServer) testEmbeddedByValue()              {}
@@ -134,74 +150,92 @@ func RegisterTodoServer(s grpc.ServiceRegistrar, srv TodoServer) {
 	s.RegisterService(&Todo_ServiceDesc, srv)
 }
 
-func _Todo_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateRequest)
+func _Todo_CreateTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTaskRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TodoServer).Create(ctx, in)
+		return srv.(TodoServer).CreateTask(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Todo_Create_FullMethodName,
+		FullMethod: Todo_CreateTask_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TodoServer).Create(ctx, req.(*CreateRequest))
+		return srv.(TodoServer).CreateTask(ctx, req.(*CreateTaskRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Todo_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRequest)
+func _Todo_ListTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTasksRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TodoServer).List(ctx, in)
+		return srv.(TodoServer).ListTasks(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Todo_List_FullMethodName,
+		FullMethod: Todo_ListTasks_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TodoServer).List(ctx, req.(*ListRequest))
+		return srv.(TodoServer).ListTasks(ctx, req.(*ListTasksRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Todo_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRequest)
+func _Todo_DeleteTaskByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTaskByIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TodoServer).Delete(ctx, in)
+		return srv.(TodoServer).DeleteTaskByID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Todo_Delete_FullMethodName,
+		FullMethod: Todo_DeleteTaskByID_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TodoServer).Delete(ctx, req.(*DeleteRequest))
+		return srv.(TodoServer).DeleteTaskByID(ctx, req.(*DeleteTaskByIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Todo_Done_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DoneRequest)
+func _Todo_DoneTaskByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DoneTaskByIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TodoServer).Done(ctx, in)
+		return srv.(TodoServer).DoneTaskByID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Todo_Done_FullMethodName,
+		FullMethod: Todo_DoneTaskByID_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TodoServer).Done(ctx, req.(*DoneRequest))
+		return srv.(TodoServer).DoneTaskByID(ctx, req.(*DoneTaskByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Todo_GetByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoServer).GetByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Todo_GetByID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoServer).GetByID(ctx, req.(*GetByIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -214,20 +248,24 @@ var Todo_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*TodoServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Create",
-			Handler:    _Todo_Create_Handler,
+			MethodName: "CreateTask",
+			Handler:    _Todo_CreateTask_Handler,
 		},
 		{
-			MethodName: "List",
-			Handler:    _Todo_List_Handler,
+			MethodName: "ListTasks",
+			Handler:    _Todo_ListTasks_Handler,
 		},
 		{
-			MethodName: "Delete",
-			Handler:    _Todo_Delete_Handler,
+			MethodName: "DeleteTaskByID",
+			Handler:    _Todo_DeleteTaskByID_Handler,
 		},
 		{
-			MethodName: "Done",
-			Handler:    _Todo_Done_Handler,
+			MethodName: "DoneTaskByID",
+			Handler:    _Todo_DoneTaskByID_Handler,
+		},
+		{
+			MethodName: "GetByID",
+			Handler:    _Todo_GetByID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

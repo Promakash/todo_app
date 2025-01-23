@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"todo/db-service/internal/domain"
 	"todo/db-service/internal/repository"
@@ -41,6 +43,22 @@ func (r *TaskRepository) DeleteTaskByID(ctx context.Context, id domain.TaskID) e
 	}
 
 	return nil
+}
+
+func (r *TaskRepository) GetTaskByID(ctx context.Context, id domain.TaskID) (domain.Task, error) {
+	query := `SELECT id, name, description, is_done FROM tasks
+              WHERE id = $1`
+
+	var task domain.Task
+
+	err := r.pool.QueryRow(ctx, query, id).Scan(&task.ID, &task.Name, &task.Description, &task.IsDone)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return task, domain.ErrNotFound
+		}
+	}
+
+	return task, err
 }
 
 func (r *TaskRepository) UpdateStatusByID(ctx context.Context, id domain.TaskID, status bool) error {

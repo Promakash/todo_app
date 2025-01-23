@@ -51,3 +51,8 @@ func Err(err error) slog.Attr {
 		Value: slog.StringValue(err.Error()),
 	}
 }
+
+func Fatal(l *slog.Logger, msg string, err error) {
+	l.Error(msg, err)
+	os.Exit(1)
+}

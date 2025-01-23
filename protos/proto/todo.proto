@@ -5,10 +5,11 @@ package todo;
 option go_package = "promakash.todo.v1;todov1";
 
 service Todo {
-  rpc Create (CreateRequest) returns (CreateResponse);
-  rpc List (ListRequest) returns (ListResponse);
-  rpc Delete (DeleteRequest) returns (DeleteResponse);
-  rpc Done (DoneRequest) returns (DoneResponse);
+  rpc CreateTask (CreateTaskRequest) returns (CreateTaskResponse);
+  rpc ListTasks (ListTasksRequest) returns (ListTasksResponse);
+  rpc DeleteTaskByID (DeleteTaskByIDRequest) returns (DeleteTaskByIDResponse);
+  rpc DoneTaskByID (DoneTaskByIDRequest) returns (DoneTaskByIDResponse);
+  rpc GetByID (GetByIDRequest) returns (GetByIDResponse);
 }
 
 message Task{
@@ -18,29 +19,37 @@ message Task{
   bool isDone = 4;
 }
 
-message CreateRequest{
+message CreateTaskRequest{
   string name = 1;
   string description = 2;
 }
 
-message CreateResponse{
+message CreateTaskResponse{
   uint64 id = 1;
 }
 
-message ListRequest{}
+message ListTasksRequest{}
 
-message ListResponse{
+message ListTasksResponse{
   repeated Task tasks = 1;
 }
 
-message DeleteRequest{
+message DeleteTaskByIDRequest{
   uint64 id = 1;
 }
 
-message DeleteResponse{}
+message DeleteTaskByIDResponse{}
 
-message DoneRequest{
+message DoneTaskByIDRequest{
   uint64 id = 1;
 }
 
-message DoneResponse{}
+message DoneTaskByIDResponse{}
+
+message GetByIDRequest{
+  uint64 id = 1;
+}
+
+message GetByIDResponse{
+  Task task = 1;
+}

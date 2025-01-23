@@ -3,21 +3,27 @@ package service
 import (
 	"context"
 	"log/slog"
+	"time"
 	"todo/db-service/internal/domain"
 	"todo/db-service/internal/repository"
 	"todo/db-service/internal/usecases"
+	"todo/pkg/infra/cache"
 	pkglog "todo/pkg/log"
 )
 
 type TaskService struct {
-	log  *slog.Logger
-	repo repository.Task
+	log        *slog.Logger
+	repo       repository.Task
+	cache      cache.Cache
+	defaultTTL time.Duration
 }
 
-func NewTaskService(repo repository.Task, log *slog.Logger) usecases.Task {
+func NewTaskService(log *slog.Logger, repo repository.Task, cache cache.Cache, defaultTTL time.Duration) usecases.Task {
 	return &TaskService{
-		repo: repo,
-		log:  log,
+		repo:       repo,
+		log:        log,
+		cache:      cache,
+		defaultTTL: defaultTTL,
 	}
 }
 
@@ -38,6 +44,7 @@ func (s *TaskService) CreateTask(task domain.Task) (domain.TaskID, error) {
 
 	return id, err
 }
+
 func (s *TaskService) ListTasks() ([]domain.Task, error) {
 	const op = "Task.ListTasks"
 
@@ -50,12 +57,15 @@ func (s *TaskService) ListTasks() ([]domain.Task, error) {
 	tasks, err := s.repo.GetTasks(context.Background())
 	if err != nil {
 		log.Error("can't list tasks: ", pkglog.Err(err))
+		return nil, err
 	}
 
 	return tasks, err
 }
-func (s *TaskService) DeleteTask(id domain.TaskID) error {
-	const op = "Task.ListTasks"
+
+func (s *TaskService) DeleteTaskByID(id domain.TaskID) error {
+	const op = "Task.DeleteTaskByID"
+	ctx := context.Background()
 
 	log := s.log.With(
 		slog.String("op", op),
@@ -64,15 +74,19 @@ func (s *TaskService) DeleteTask(id domain.TaskID) error {
 
 	log.Info("Trying to delete task")
 
-	err := s.repo.DeleteTaskByID(context.Background(), id)
+	err := s.repo.DeleteTaskByID(ctx, id)
 	if err != nil {
 		log.Error("can't delete task: ", pkglog.Err(err))
+	} else {
+		go func() { _ = s.cache.Delete(ctx, domain.TaskIDToString(id)) }()
 	}
 
 	return err
 }
-func (s *TaskService) DoneTask(id domain.TaskID) error {
-	const op = "Task.DoneTask"
+
+func (s *TaskService) DoneTaskByID(id domain.TaskID) error {
+	const op = "Task.DoneTaskByID"
+	ctx := context.Background()
 
 	log := s.log.With(
 		slog.String("op", op),
@@ -81,10 +95,42 @@ func (s *TaskService) DoneTask(id domain.TaskID) error {
 
 	log.Info("Trying to mark task as done")
 
-	err := s.repo.UpdateStatusByID(context.Background(), id, true)
+	err := s.repo.UpdateStatusByID(ctx, id, true)
 	if err != nil {
 		log.Error("can't mark task as done: ", pkglog.Err(err))
+	} else {
+		go func() { _ = s.cache.Delete(ctx, domain.TaskIDToString(id)) }()
 	}
 
 	return err
+}
+
+func (s *TaskService) GetTaskByID(id domain.TaskID) (domain.Task, error) {
+	const op = "Task.GetTaskByID"
+	ctx := context.Background()
+
+	log := s.log.With(
+		slog.String("op", op),
+		slog.Uint64("id", id),
+	)
+
+	log.Info("Trying to get task by id")
+
+	var task domain.Task
+
+	err := s.cache.Get(ctx, domain.TaskIDToString(id), &task)
+	if err == nil {
+		return task, nil
+	} else {
+		log.Error("error while getting value from cache: ", pkglog.Err(err))
+	}
+
+	task, err = s.repo.GetTaskByID(ctx, id)
+	if err != nil {
+		log.Error("can't get task by id: ", pkglog.Err(err))
+	} else {
+		_ = s.cache.Set(ctx, domain.TaskIDToString(id), task, s.defaultTTL)
+	}
+
+	return task, err
 }

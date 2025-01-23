@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"log/slog"
-	"os"
-	"todo/db-service/cmd/grpc"
+	"time"
+	"todo/db-service/internal/app/grpc"
 	sConfig "todo/db-service/internal/config"
 	"todo/db-service/internal/repository/postgres"
 	"todo/db-service/internal/service"
 	"todo/pkg/config"
 	"todo/pkg/infra"
+	"todo/pkg/infra/cache/redis"
 	pkglog "todo/pkg/log"
 	"todo/pkg/shutdown"
 )
@@ -25,13 +26,19 @@ func main() {
 
 	dbPool, err := infra.NewPostgresPool(cfg.PG)
 	if err != nil {
-		log.Error("error while setting new postgres connection: ", err)
-		os.Exit(1)
+		pkglog.Fatal(log, "error while setting new postgres connection: ", err)
 	}
 	defer dbPool.Close()
-
 	taskRepo := postgres.NewTaskRepository(dbPool)
-	taskService := service.NewTaskService(taskRepo, log)
+
+	redisClient, err := redis.NewRedisClient(cfg.Redis)
+	if err != nil {
+		pkglog.Fatal(log, "error while setting new redis connection: ", err)
+	}
+	defer redis.ShutdownClient(redisClient)
+	cacheService := redis.NewRedisService(redisClient)
+
+	taskService := service.NewTaskService(log, taskRepo, cacheService, time.Second*time.Duration(cfg.Redis.TTL))
 
 	application := grpc.NewApp(log, cfg.GRPC.Port, taskService)
 

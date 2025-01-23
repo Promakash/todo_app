@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 	"log/slog"
 	"net"
-	todoservice "todo/db-service/internal/grpc/todo_service"
+	todoservice "todo/db-service/internal/grpc/todo"
 	"todo/db-service/internal/usecases"
 	pkglog "todo/pkg/log"
 )

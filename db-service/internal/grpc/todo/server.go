@@ -1,4 +1,4 @@
-package todo_service
+package todo
 
 import (
 	"context"
@@ -20,17 +20,17 @@ func Register(gRPC *grpc.Server, service usecases.Task) {
 	todov1.RegisterTodoServer(gRPC, &DBService{service: service})
 }
 
-func (s *DBService) Create(ctx context.Context, request *todov1.CreateRequest) (*todov1.CreateResponse, error) {
-	if request.Name == "" {
+func (s *DBService) CreateTask(ctx context.Context, request *todov1.CreateTaskRequest) (*todov1.CreateTaskResponse, error) {
+	if request.GetName() == "" {
 		return nil, status.Error(codes.InvalidArgument, "task's name is required")
 	}
-	if request.Description == "" {
+	if request.GetDescription() == "" {
 		return nil, status.Error(codes.InvalidArgument, "task's description is required")
 	}
 
 	task := domain.Task{
-		Name:        request.Name,
-		Description: request.Description,
+		Name:        request.GetName(),
+		Description: request.GetDescription(),
 	}
 
 	id, err := s.service.CreateTask(task)
@@ -38,16 +38,16 @@ func (s *DBService) Create(ctx context.Context, request *todov1.CreateRequest) (
 		return nil, status.Error(codes.Internal, "internal server error")
 	}
 
-	return &todov1.CreateResponse{Id: id}, nil
+	return &todov1.CreateTaskResponse{Id: id}, nil
 }
 
-func (s *DBService) List(ctx context.Context, request *todov1.ListRequest) (*todov1.ListResponse, error) {
+func (s *DBService) ListTasks(ctx context.Context, request *todov1.ListTasksRequest) (*todov1.ListTasksResponse, error) {
 	tasks, err := s.service.ListTasks()
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal server error")
 	}
 
-	response := &todov1.ListResponse{}
+	response := &todov1.ListTasksResponse{}
 
 	for _, task := range tasks {
 		response.Tasks = append(response.Tasks, &todov1.Task{
@@ -61,8 +61,8 @@ func (s *DBService) List(ctx context.Context, request *todov1.ListRequest) (*tod
 	return response, nil
 }
 
-func (s *DBService) Delete(ctx context.Context, request *todov1.DeleteRequest) (*todov1.DeleteResponse, error) {
-	err := s.service.DeleteTask(request.Id)
+func (s *DBService) DeleteTaskByID(ctx context.Context, request *todov1.DeleteTaskByIDRequest) (*todov1.DeleteTaskByIDResponse, error) {
+	err := s.service.DeleteTaskByID(request.Id)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			return nil, status.Error(codes.InvalidArgument, "invalid task's id")
@@ -70,11 +70,11 @@ func (s *DBService) Delete(ctx context.Context, request *todov1.DeleteRequest) (
 		return nil, status.Error(codes.Internal, "internal server error")
 	}
 
-	return &todov1.DeleteResponse{}, nil
+	return &todov1.DeleteTaskByIDResponse{}, nil
 }
 
-func (s *DBService) Done(ctx context.Context, request *todov1.DoneRequest) (*todov1.DoneResponse, error) {
-	err := s.service.DoneTask(request.Id)
+func (s *DBService) DoneTaskByID(ctx context.Context, request *todov1.DoneTaskByIDRequest) (*todov1.DoneTaskByIDResponse, error) {
+	err := s.service.DoneTaskByID(request.Id)
 
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
@@ -83,5 +83,24 @@ func (s *DBService) Done(ctx context.Context, request *todov1.DoneRequest) (*tod
 		return nil, status.Error(codes.Internal, "internal server error")
 	}
 
-	return &todov1.DoneResponse{}, nil
+	return &todov1.DoneTaskByIDResponse{}, nil
+}
+
+func (s *DBService) GetByID(ctx context.Context, request *todov1.GetByIDRequest) (*todov1.GetByIDResponse, error) {
+	task, err := s.service.GetTaskByID(request.GetId())
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return nil, status.Error(codes.InvalidArgument, "invalid task's id")
+		}
+		return nil, status.Error(codes.Internal, "internal server error")
+	}
+
+	return &todov1.GetByIDResponse{
+		Task: &todov1.Task{
+			Id:          task.ID,
+			Name:        task.Name,
+			Description: task.Description,
+			IsDone:      task.IsDone,
+		},
+	}, nil
 }
