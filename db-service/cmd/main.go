@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"log/slog"
-	"time"
 	"todo/db-service/internal/app/grpc"
-	sConfig "todo/db-service/internal/config"
+	"todo/db-service/internal/config"
 	"todo/db-service/internal/repository/postgres"
 	"todo/db-service/internal/service"
-	"todo/pkg/config"
+	pkgconfig "todo/pkg/config"
 	"todo/pkg/infra"
 	"todo/pkg/infra/cache/redis"
 	pkglog "todo/pkg/log"
@@ -18,7 +17,7 @@ import (
 const ConfigEnvVar = "DB_SERVICE_CONFIG"
 
 func main() {
-	cfg := config.MustLoad[sConfig.Config](ConfigEnvVar)
+	cfg := pkgconfig.MustLoad[config.Config](ConfigEnvVar)
 
 	log := pkglog.NewLogger("debug", "json")
 	slog.SetDefault(log)
@@ -38,7 +37,7 @@ func main() {
 	defer redis.ShutdownClient(redisClient)
 	cacheService := redis.NewRedisService(redisClient)
 
-	taskService := service.NewTaskService(log, taskRepo, cacheService, time.Second*time.Duration(cfg.Redis.TTL))
+	taskService := service.NewTaskService(log, taskRepo, cacheService, cfg.Redis.TTL)
 
 	application := grpc.NewApp(log, cfg.GRPC.Port, taskService)
 

@@ -12,4 +12,4 @@ redis:
   host: cache
   port: 6379
   password: redis
-  TTL: 120
+  TTL: 120s
