@@ -53,6 +53,6 @@ func Err(err error) slog.Attr {
 }
 
 func Fatal(l *slog.Logger, msg string, err error) {
-	l.Error(msg, err)
+	l.Error(msg, Err(err))
 	os.Exit(1)
 }

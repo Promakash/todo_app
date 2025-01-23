@@ -16,7 +16,7 @@ func ListenSignal(ctx context.Context, logger *slog.Logger) {
 	case <-ctx.Done():
 		return
 	case sig := <-sigquit:
-		logger.Info("Captured signal: ", sig)
+		logger.Info("Captured signal: ", slog.String("signal", sig.String()))
 		return
 	}
 }

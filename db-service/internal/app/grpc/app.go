@@ -64,7 +64,7 @@ func (a *App) Run() error {
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
 	if err != nil {
-		return fmt.Errorf("%s: %w, op, err")
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("grpc server has started", slog.String("addr", l.Addr().String()))
