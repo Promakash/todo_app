@@ -36,7 +36,6 @@ func Converter(h Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		resp := h(r)
 		if resp == nil {
-			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 

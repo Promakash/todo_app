@@ -1,22 +1,24 @@
 package log
 
 import (
-	"context"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"io"
+	"log"
 	"log/slog"
 	"os"
+	"time"
 )
 
 type Config struct {
-	Level  string `yaml:"level"`
-	Format string `yaml:"format"`
+	Level     string `yaml:"level"`
+	Format    string `yaml:"format"`
+	Directory string `yaml:"directory"`
 }
 
-func NewLogger(level string, format string) *slog.Logger {
+func NewLogger(cfg Config) (*slog.Logger, *os.File) {
 	var handler slog.Handler
 
 	var logLevel slog.Level
-	switch level {
+	switch cfg.Level {
 	case "debug":
 		logLevel = slog.LevelDebug
 	case "info":
@@ -29,20 +31,45 @@ func NewLogger(level string, format string) *slog.Logger {
 		logLevel = slog.LevelInfo
 	}
 
-	switch format {
-	case "text":
-		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})
-	default:
-		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})
+	needFile := len(cfg.Directory) != 0
+
+	file, err := createLogFile(cfg.Directory)
+	if err != nil && needFile {
+		log.Fatal("error while creating log file")
 	}
 
-	return slog.New(handler)
+	var writer io.Writer
+	if needFile {
+		writer = io.MultiWriter(os.Stdout, file)
+	} else {
+		writer = os.Stdout
+	}
+
+	switch cfg.Format {
+	case "text":
+		handler = slog.NewTextHandler(writer, &slog.HandlerOptions{Level: logLevel})
+	default:
+		handler = slog.NewJSONHandler(writer, &slog.HandlerOptions{Level: logLevel})
+	}
+
+	return slog.New(handler), file
 }
 
-func InterceptorLogger(l *slog.Logger) logging.Logger {
-	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
-		l.Log(ctx, slog.Level(lvl), msg, fields...)
-	})
+func createLogFile(directory string) (*os.File, error) {
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		if err := os.MkdirAll(directory, 0755); err != nil {
+			return nil, err
+		}
+	}
+
+	filePath := directory + "/" + time.Now().String() + ".log"
+
+	logFile, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	return logFile, nil
 }
 
 func Err(err error) slog.Attr {

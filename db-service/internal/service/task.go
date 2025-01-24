@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"time"
-	"todo/db-service/internal/domain"
+	"todo/db-service/domain"
 	"todo/db-service/internal/repository"
 	"todo/db-service/internal/usecases"
 	"todo/pkg/infra/cache"

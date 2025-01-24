@@ -19,7 +19,8 @@ const ConfigEnvVar = "DB_SERVICE_CONFIG"
 func main() {
 	cfg := pkgconfig.MustLoad[config.Config](ConfigEnvVar)
 
-	log := pkglog.NewLogger("debug", "json")
+	log, file := pkglog.NewLogger(cfg.Logger)
+	defer func() { _ = file.Close() }()
 	slog.SetDefault(log)
 	log.Info("Starting dbService", slog.Any("config", cfg))
 
@@ -43,7 +44,7 @@ func main() {
 
 	application.MustRun()
 
-	shutdown.ListenSignal(context.Background(), log)
+	_ = shutdown.ListenSignal(context.Background(), log)
 
 	application.Stop()
 

@@ -1,4 +1,17 @@
 services:
+  api-gateway:
+    build:
+      dockerfile: ./api-gateway/Dockerfile
+      context: ./
+    depends_on:
+      db-service:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      - API_GATEWAY_CONFIG=config/docker.yml
+    volumes:
+      - ./logs/api-gateway:/app/logs
   db-service:
     build:
       dockerfile: ./db-service/Dockerfile
@@ -12,6 +25,8 @@ services:
       - "5050:5050"
     environment:
       - DB_SERVICE_CONFIG=config/docker.yml
+    volumes:
+      - ./logs/db-service:/app/logs
   storage:
     healthcheck:
       test: pg_isready -U postgres -d postgres

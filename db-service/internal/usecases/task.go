@@ -1,6 +1,8 @@
 package usecases
 
-import "todo/db-service/internal/domain"
+import (
+	"todo/db-service/domain"
+)
 
 type Task interface {
 	CreateTask(task domain.Task) (domain.TaskID, error)

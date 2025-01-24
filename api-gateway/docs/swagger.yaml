@@ -1,0 +1,194 @@
+basePath: /api/v1/
+definitions:
+  domain.Task:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      is_done:
+        type: boolean
+      name:
+        type: string
+    type: object
+  responses.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  types.CreateTaskRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  types.CreateTaskResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  types.DeleteTaskByIDResponse:
+    type: object
+  types.DoneTaskByIDResponse:
+    type: object
+  types.GetTaskByIDResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      is_done:
+        type: boolean
+      name:
+        type: string
+    type: object
+  types.GetTasksResponse:
+    properties:
+      tasks:
+        items:
+          $ref: '#/definitions/domain.Task'
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Gateway for GRPC service of task management
+  termsOfService: http://swagger.io/terms/
+  title: Task Manager API Gateway
+  version: "1.0"
+paths:
+  /task:
+    delete:
+      description: Deletes task by ID
+      parameters:
+      - description: Task ID
+        format: int64
+        in: query
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task deleted successfully
+          schema:
+            $ref: '#/definitions/types.DeleteTaskByIDResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Task does not exist
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Deletes task by ID
+    get:
+      description: Returns task by ID
+      parameters:
+      - description: Task ID
+        format: int64
+        in: query
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task returned successfully
+          schema:
+            $ref: '#/definitions/types.GetTaskByIDResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Task does not exist
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Returns task by ID
+    post:
+      consumes:
+      - application/json
+      description: Creates task
+      parameters:
+      - description: Task info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task created successfully
+          schema:
+            $ref: '#/definitions/types.CreateTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Creates task
+    put:
+      description: Marks task as done
+      parameters:
+      - description: Task ID
+        format: int64
+        in: query
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task marked as done successfully
+          schema:
+            $ref: '#/definitions/types.DoneTaskByIDResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Task does not exist
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Marks task as done
+  /tasks:
+    get:
+      description: Returns array of all tasks that exist in DB
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully returned
+          schema:
+            $ref: '#/definitions/types.GetTasksResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Returns array of all tasks
+swagger: "2.0"

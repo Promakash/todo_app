@@ -1,15 +1,20 @@
 grpc:
   port: 5050
 
-postgres:                  # Конфиг PostgreSQL:
-  host: storage            # Хост бд
-  port: 5432               # Порт бд
-  user: postgres           # Имя пользователя
-  password: password       # Пароль пользователя
-  db_name: postgres        # Имя бд
+postgres:
+  host: storage
+  port: 5432
+  user: postgres
+  password: password
+  db_name: postgres
 
 redis:
   host: cache
   port: 6379
   password: redis
   TTL: 120s
+
+logger:
+  level: debug
+  format: json
+  directory: /app/logs

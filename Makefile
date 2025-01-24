@@ -1,6 +1,15 @@
 PROTO_SRC_DIR := protos/proto
 PROTO_GEN_DIR := protos/gen/go
 
+.PHONY: proto_generate clean_proto
+
+generate_docs:
+	swag fmt
+	swag init -g api-gateway/cmd/http/main.go -o api-gateway/docs
+
+lint_code:
+	golangci-lint run
+
 proto_generate:
 	protoc -I=$(PROTO_SRC_DIR) \
 		$(PROTO_SRC_DIR)/*.proto \
@@ -9,5 +18,3 @@ proto_generate:
 
 clean_proto:
 	rm -rf $(PROTO_GEN_DIR)/*
-
-.PHONY: proto_generate clean_proto

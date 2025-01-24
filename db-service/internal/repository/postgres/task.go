@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"todo/db-service/internal/domain"
+	domain2 "todo/db-service/domain"
 	"todo/db-service/internal/repository"
 )
 
@@ -19,17 +19,17 @@ func NewTaskRepository(pool *pgxpool.Pool) repository.Task {
 	}
 }
 
-func (r *TaskRepository) PutTask(ctx context.Context, task domain.Task) (domain.TaskID, error) {
+func (r *TaskRepository) PutTask(ctx context.Context, task domain2.Task) (domain2.TaskID, error) {
 	query := `INSERT INTO tasks (name, description, is_done)
 			  VALUES ($1, $2, $3)
 			  RETURNING id`
 
-	var id domain.TaskID
+	var id domain2.TaskID
 	err := r.pool.QueryRow(ctx, query, task.Name, task.Description, task.IsDone).Scan(&id)
 	return id, err
 }
 
-func (r *TaskRepository) DeleteTaskByID(ctx context.Context, id domain.TaskID) error {
+func (r *TaskRepository) DeleteTaskByID(ctx context.Context, id domain2.TaskID) error {
 	query := `DELETE FROM tasks
               WHERE id = $1`
 
@@ -39,29 +39,29 @@ func (r *TaskRepository) DeleteTaskByID(ctx context.Context, id domain.TaskID) e
 	}
 
 	if cmdTag.RowsAffected() == 0 {
-		return domain.ErrNotFound
+		return domain2.ErrNotFound
 	}
 
 	return nil
 }
 
-func (r *TaskRepository) GetTaskByID(ctx context.Context, id domain.TaskID) (domain.Task, error) {
+func (r *TaskRepository) GetTaskByID(ctx context.Context, id domain2.TaskID) (domain2.Task, error) {
 	query := `SELECT id, name, description, is_done FROM tasks
               WHERE id = $1`
 
-	var task domain.Task
+	var task domain2.Task
 
 	err := r.pool.QueryRow(ctx, query, id).Scan(&task.ID, &task.Name, &task.Description, &task.IsDone)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return task, domain.ErrNotFound
+			return task, domain2.ErrNotFound
 		}
 	}
 
 	return task, err
 }
 
-func (r *TaskRepository) UpdateStatusByID(ctx context.Context, id domain.TaskID, status bool) error {
+func (r *TaskRepository) UpdateStatusByID(ctx context.Context, id domain2.TaskID, status bool) error {
 	query := `UPDATE tasks
 		      SET is_done  = $1
 		      WHERE id = $2`
@@ -72,13 +72,13 @@ func (r *TaskRepository) UpdateStatusByID(ctx context.Context, id domain.TaskID,
 	}
 
 	if cmdTag.RowsAffected() == 0 {
-		return domain.ErrNotFound
+		return domain2.ErrNotFound
 	}
 
 	return nil
 }
 
-func (r *TaskRepository) GetTasks(ctx context.Context) ([]domain.Task, error) {
+func (r *TaskRepository) GetTasks(ctx context.Context) ([]domain2.Task, error) {
 	query := `SELECT id, name, description, is_done
 			  FROM tasks`
 
@@ -88,9 +88,9 @@ func (r *TaskRepository) GetTasks(ctx context.Context) ([]domain.Task, error) {
 	}
 	defer rows.Close()
 
-	var tasks []domain.Task
+	var tasks []domain2.Task
 	for rows.Next() {
-		var task domain.Task
+		var task domain2.Task
 		if err := rows.Scan(&task.ID, &task.Name, &task.Description, &task.IsDone); err != nil {
 			return nil, err
 		}

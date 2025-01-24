@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"todo/db-service/internal/domain"
+	"todo/db-service/domain"
 )
 
 type Task interface {

@@ -11,7 +11,7 @@ import (
 	"net"
 	todoservice "todo/db-service/internal/grpc/todo"
 	"todo/db-service/internal/usecases"
-	pkglog "todo/pkg/log"
+	pkggrpc "todo/pkg/grpc"
 )
 
 type App struct {
@@ -37,7 +37,7 @@ func NewApp(log *slog.Logger, port int, service usecases.Task) *App {
 
 	gRPCServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
 		recovery.UnaryServerInterceptor(recoveryOpts...),
-		logging.UnaryServerInterceptor(pkglog.InterceptorLogger(log), loggingOpts...),
+		logging.UnaryServerInterceptor(pkggrpc.InterceptorLogger(log), loggingOpts...),
 	))
 
 	todoservice.Register(gRPCServer, service)
