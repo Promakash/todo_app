@@ -109,3 +109,9 @@ func WithProfilerHandlers() RouterOption {
 		middleware.Profiler()
 	}
 }
+
+func WithRequestID() RouterOption {
+	return func(r chi.Router) {
+		r.Use(middleware.RequestID)
+	}
+}

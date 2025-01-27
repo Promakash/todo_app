@@ -1,4 +1,4 @@
-FROM golang:1.23.4-alpine AS build
+FROM golang:1.23.4 AS build
 
 WORKDIR /build
 
@@ -10,7 +10,7 @@ COPY . .
 
 RUN go build -o api-app api-gateway/cmd/http/main.go
 
-FROM alpine AS runner
+FROM ubuntu:22.04 AS runner
 
 WORKDIR /app
 

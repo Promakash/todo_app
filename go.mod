@@ -3,6 +3,7 @@ module todo
 go 1.23.4
 
 require (
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/render v1.0.3
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.2.0
@@ -10,6 +11,8 @@ require (
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/swaggo/http-swagger v1.3.4
+	github.com/swaggo/swag v1.16.4
+	golang.org/x/sync v0.10.0
 	google.golang.org/grpc v1.69.4
 	google.golang.org/protobuf v1.35.1
 )
@@ -32,15 +35,12 @@ require (
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
-	github.com/swaggo/swag v1.16.4 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.29.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241015192408-796eee8c2d53 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )

@@ -10,6 +10,13 @@ grpc_client:
   retries: 3
 
 logger:
-  level: debug
-  format: json
-  directory: /app/logs
+  level: "debug"
+  format: "json"
+  directory: "/app/logs"
+
+kafka:
+  broker_address: "kafka:9092"
+  topic: "metrics"
+  retries: 3
+  timeout: 10s
+  acks: "0"

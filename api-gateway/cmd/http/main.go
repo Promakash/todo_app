@@ -9,9 +9,11 @@ import (
 	"todo/api-gateway/internal/api/http"
 	"todo/api-gateway/internal/clients/todo/grpc"
 	"todo/api-gateway/internal/config"
+	prodmiddleware "todo/api-gateway/internal/producer/kafka/middleware"
 	pkgconfig "todo/pkg/config"
 	"todo/pkg/http/handlers"
 	"todo/pkg/http/server"
+	pkgkafka "todo/pkg/infra/broker/producer/kafka"
 	pkglog "todo/pkg/log"
 	"todo/pkg/shutdown"
 )
@@ -52,10 +54,18 @@ func main() {
 		pkglog.Fatal(log, "error while setting new grpc client: ", err)
 	}
 
+	kafkaProd, err := pkgkafka.NewProducer(cfg.KafkaProd)
+	if err != nil {
+		pkglog.Fatal(log, "error while setting new kafka producer: ", err)
+	}
+	defer kafkaProd.Close()
+
 	taskHandler := http.NewTaskHandler(log, grpcClient)
 
 	publicHandler := handlers.NewHandler(APIPath,
 		handlers.WithLogging(log),
+		prodmiddleware.WithMetricsProducer(ctx, log, kafkaProd),
+		handlers.WithRequestID(),
 		handlers.WithRecover(),
 		handlers.WithProfilerHandlers(),
 		handlers.WithSwagger(),
