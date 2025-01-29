@@ -10,6 +10,15 @@ generate_docs:
 lint_code:
 	golangci-lint run
 
+build: proto_generate lint_code generate_docs
+	docker compose build
+
+run:
+	docker compose up -d
+
+stop:
+	docker compose
+
 proto_generate:
 	protoc -I=$(PROTO_SRC_DIR) \
 		$(PROTO_SRC_DIR)/*.proto \

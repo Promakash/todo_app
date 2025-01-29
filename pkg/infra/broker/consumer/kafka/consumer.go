@@ -1,7 +1,6 @@
 package kafka
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
@@ -42,7 +41,7 @@ func NewConsumer(cfg Config) (*BrokerConsumer, error) {
 	}, nil
 }
 
-func (c *BrokerConsumer) Consume(ctx context.Context, msg any) error {
+func (c *BrokerConsumer) Consume(msg any) error {
 	m, err := c.KafkaConsumer.ReadMessage(-1)
 	if err != nil {
 		return err

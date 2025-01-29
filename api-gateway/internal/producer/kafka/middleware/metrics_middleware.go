@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
-	consumer "todo/analytics-service/domain"
+	consumerDomain "todo/metrics-service/domain"
 	"todo/pkg/http/handlers"
 	"todo/pkg/infra/broker/producer"
 	pkglog "todo/pkg/log"
@@ -34,7 +34,7 @@ func NewMetricsProducerMiddleware(ctx context.Context, log *slog.Logger, produce
 			defer func() {
 				duration := time.Since(t1)
 
-				metrics := consumer.ResponseMetrics{
+				metrics := consumerDomain.ResponseMetrics{
 					Method:     r.Method,
 					Path:       r.URL.Path,
 					StatusCode: ww.Status(),

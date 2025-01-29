@@ -1,0 +1,12 @@
+http_server:
+  address: ":8080"
+
+logger:
+  level: "debug"
+  format: "json"
+
+kafka:
+  broker_address: "kafka:9092"
+  topic: "metrics"
+  group_id: "metrics-service"
+  offset: "earliest"

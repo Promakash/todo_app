@@ -13,7 +13,7 @@ import (
 	pkgconfig "todo/pkg/config"
 	"todo/pkg/http/handlers"
 	"todo/pkg/http/server"
-	pkgkafka "todo/pkg/infra/broker/producer/kafka"
+	kafkaproducer "todo/pkg/infra/broker/producer/kafka"
 	pkglog "todo/pkg/log"
 	"todo/pkg/shutdown"
 )
@@ -54,7 +54,7 @@ func main() {
 		pkglog.Fatal(log, "error while setting new grpc client: ", err)
 	}
 
-	kafkaProd, err := pkgkafka.NewProducer(cfg.KafkaProd)
+	kafkaProd, err := kafkaproducer.NewProducer(cfg.KafkaProd)
 	if err != nil {
 		pkglog.Fatal(log, "error while setting new kafka producer: ", err)
 	}

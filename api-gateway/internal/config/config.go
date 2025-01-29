@@ -3,7 +3,7 @@ package config
 import (
 	"time"
 	"todo/api-gateway/internal/clients/todo/grpc"
-	"todo/pkg/infra/broker/producer/kafka"
+	kafkaproducer "todo/pkg/infra/broker/producer/kafka"
 	pkglog "todo/pkg/log"
 )
 
@@ -15,8 +15,8 @@ type HTTPConfig struct {
 }
 
 type Config struct {
-	HTTPServer HTTPConfig    `yaml:"http_server"`
-	GRPCClient grpc.Config   `yaml:"grpc_client"`
-	Logger     pkglog.Config `yaml:"logger"`
-	KafkaProd  kafka.Config  `yaml:"kafka"`
+	HTTPServer HTTPConfig           `yaml:"http_server"`
+	GRPCClient grpc.Config          `yaml:"grpc_client"`
+	Logger     pkglog.Config        `yaml:"logger"`
+	KafkaProd  kafkaproducer.Config `yaml:"kafka"`
 }

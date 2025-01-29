@@ -1,5 +1,7 @@
 services:
   api-gateway:
+    healthcheck:
+      test: curl --fail http://localhost:8080/health || exit 1
     build:
       dockerfile: ./api-gateway/Dockerfile
       context: ./
@@ -24,6 +26,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     ports:
       - "5050:5050"
     environment:
@@ -40,10 +44,17 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-    volumes:
-      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5432:5432"
+
+  migrator:
+    build:
+      dockerfile: migrations/migrator/Dockerfile
+      context: ./
+    depends_on:
+      storage:
+        condition: service_healthy
+    entrypoint: ["sql-migrate", "up", "-config", "migrations/migrator/config/dbconfig.yml", "-env=docker"]
 
   cache:
     healthcheck:
@@ -59,8 +70,8 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
     ports:
-    - "9092:9092"
-    - "9093:9093"
+      - "9092:9092"
+      - "9093:9093"
     environment:
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_NODE_ID: 1
@@ -74,7 +85,54 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
       CLUSTER_ID: "U5EXbxt5RoOFSo2m57ab9Q"
     healthcheck:
       test: ["CMD", "sh", "-c", "nc -z localhost 9092"]
+    volumes:
+      - ./scripts/init_kafka.sh:/init_kafka.sh
+    command:
+      - sh
+      - -c
+      - |
+        chmod +x /init_kafka.sh
+        /init_kafka.sh
+
+
+  metrics-service:
+    container_name: metrics-service
+    build:
+      dockerfile: ./metrics-service/Dockerfile
+      context: ./
+    depends_on:
+      kafka:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    ports:
+      - "8090:8080"
+    environment:
+      - METRICS_SERVICE_CONFIG=config/docker.yml
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+    environment:
+      - "GF_SECURITY_ADMIN_PASSWORD=admin"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning:/etc/grafana/provisioning
