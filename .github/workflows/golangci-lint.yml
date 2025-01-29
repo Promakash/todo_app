@@ -18,19 +18,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      
-      - name: Cache golangci-lint
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/golangci-lint
-          key: ${{ runner.os }}-golangci-lint-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golangci-lint-
-
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
-          args: |
-            --timeout=5m
-            --new-from-rev=${{ github.event_name == 'pull_request' && 'origin/main' || 'HEAD~1' }}
+          args: --timeout=30m
